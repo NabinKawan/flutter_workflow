@@ -26,9 +26,9 @@ jobs:
 
       - name: Creating Key.properties file
         run: |
-          echo "keyPassword=\${{ secrets.KEYSTORE_PASSWORD }}" > ${{env.PROPERTIES_PATH}}
-          echo "storePassword=\${{ secrets.KEYSTORE_PASSWORD }}" >> ${{env.PROPERTIES_PATH}}
-          echo "keyAlias=\${{ secrets.KEY_ALIAS }}" >> ${{env.PROPERTIES_PATH}}
+          echo "keyPassword=${KEYSTORE_PASSWORD}" > ${{env.PROPERTIES_PATH}}
+          echo "storePassword=${KEYSTORE_PASSWORD}" >> ${{env.PROPERTIES_PATH}}
+          echo "keyAlias=${KEY_ALIAS}" >> ${{env.PROPERTIES_PATH}}
 
       - name: Create Keystore file
         run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
