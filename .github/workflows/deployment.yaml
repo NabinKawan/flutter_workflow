@@ -53,3 +53,6 @@ jobs:
 
       - name: Deploy to Staging
         run: echo "Deploying to staging environment..."
+
+      - name: ls bundle
+        run: ls build/app/outputs/bundle/
