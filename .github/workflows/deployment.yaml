@@ -11,7 +11,7 @@ jobs:
       KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      KEYSTORE_PATH: "android/app/keystore.jks"
+      PROPERTIES_PATH: "./android/key.properties"
 
     steps:
       - uses: actions/checkout@v2
@@ -24,10 +24,17 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Creating Key.properties file
+        run: |
+          echo keyPassword=\${{ secrets.KEYSTORE_PASSWORD }} > ${{env.PROPERTIES_PATH}}
+          echo storePassword=\${{ secrets.KEYSTORE_PASSWORD }} >> ${{env.PROPERTIES_PATH}}
+          echo keyAlias=\${{ secrets.KEY_ALIAS }} >> ${{env.PROPERTIES_PATH}}
+
       - name: Create Keystore file
-        run: echo $KEYSTORE_FILE | base64 -di > android/app/keystore.jks
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
 
       - name: Build appbundle
+        working-directory: android
         run: flutter build appbundle
 
       - name: Upload Artifact
