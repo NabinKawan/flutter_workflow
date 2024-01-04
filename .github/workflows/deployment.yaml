@@ -30,12 +30,8 @@ jobs:
           fileName: "android_keystore.keystore"
           encodedString: $KEYSTORE_FILE
 
-      - name: Configure Key Properties
-        run: |
-          echo "storePassword=$KEY_PASSWORD" > android/key.properties
-          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
-          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
-          echo "storeFile=${{ steps.android_keystore.outputs.filePath }}" >> android/key.properties
+      - name: Set Keystore Path
+        run: echo "KEYSTORE_PATH=${{ steps.android_keystore.outputs.filePath }}" >> $GITHUB_ENV
 
       - name: Build appbundle
         run: flutter build appbundle
