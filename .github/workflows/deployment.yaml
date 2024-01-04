@@ -5,48 +5,49 @@ on:
     branches: ["main"]
 
 jobs:
-  #   build:
-  #     runs-on: ubuntu-latest
-  #     defaults:
-  #       run:
-  #         working-directory: app/
-  #     env:
-  #       KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-  #       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-  #       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-  #       PROPERTIES_PATH: "./android/key.properties"
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/
+    env:
+      KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      PROPERTIES_PATH: "./android/key.properties"
 
-  #     steps:
-  #       - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-  #   - name: Set Up Flutter
-  #     uses: subosito/flutter-action@v2.8.0
-  #     with:
-  #       flutter-version: 3.16.0
+      - name: Set Up Flutter
+        uses: subosito/flutter-action@v2.8.0
+        with:
+          flutter-version: 3.16.0
 
-  #   - name: Install Dependencies
-  #     run: flutter pub get
+      - name: Install Dependencies
+        run: flutter pub get
 
-  #   - name: Creating Key.properties file
-  #     run: |
-  #       echo "keyPassword=${KEYSTORE_PASSWORD}" > ${{env.PROPERTIES_PATH}}
-  #       echo "storePassword=${KEYSTORE_PASSWORD}" >> ${{env.PROPERTIES_PATH}}
-  #       echo "keyAlias=${KEY_ALIAS}" >> ${{env.PROPERTIES_PATH}}
+      - name: Creating Key.properties file
+        run: |
+          echo "keyPassword=${KEYSTORE_PASSWORD}" > ${{env.PROPERTIES_PATH}}
+          echo "storePassword=${KEYSTORE_PASSWORD}" >> ${{env.PROPERTIES_PATH}}
+          echo "keyAlias=${KEY_ALIAS}" >> ${{env.PROPERTIES_PATH}}
 
-  #   - name: Create Keystore file
-  #     run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
+      - name: Create Keystore file
+        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
 
-  #   - name: Build appbundle
-  #     working-directory: app/android
-  #     run: flutter build appbundle
+      - name: Build appbundle
+        working-directory: app/android
+        run: flutter build appbundle
 
-  #   - name: Upload Artifact
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: app-release
-  #       path: app/build/app/outputs/bundle/
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-release
+          path: app/build/app/outputs/bundle/
 
   deploy-to-staging:
+    needs: build
     runs-on: ubuntu-latest
     defaults:
       run:
