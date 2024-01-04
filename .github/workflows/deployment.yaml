@@ -54,5 +54,11 @@ jobs:
       - name: Deploy to Staging
         run: echo "Deploying to staging environment..."
 
-      - name: ls bundle
+      - name: Download Artifact
+        uses: build/app/outputs/bundle/
+        with:
+          name: app-release
+          path: app-release-artifact
+
+      - name: ls downloaded bundle
         run: ls build/app/outputs/bundle/
