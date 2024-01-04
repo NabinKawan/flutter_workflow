@@ -37,7 +37,7 @@ jobs:
         run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
 
       - name: Build appbundle
-        working-directory: android
+        working-directory: app/android
         run: flutter build appbundle
 
       - name: Upload Artifact
