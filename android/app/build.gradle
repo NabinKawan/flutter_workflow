@@ -32,7 +32,7 @@ else {
     keystoreProperties.setProperty('storePassword', System.getenv('KEYSTORE_PASSWORD'))
     keystoreProperties.setProperty('keyPassword', System.getenv('KEYSTORE_PASSWORD'))
     keystoreProperties.setProperty('keyAlias', System.getenv('KEY_ALIAS'))
-    keystoreProperties.setProperty('storeFile', System.getenv('KEYSTORE_FILE'))
+    keystoreProperties.setProperty('storeFile', System.getenv('KEYSTORE_PATH'))
 }
 
 android {
