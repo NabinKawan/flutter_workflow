@@ -27,14 +27,11 @@ jobs:
         uses: timheuer/base64-to-file@v1
         id: android_keystore
         with:
-          fileName: "android_keystore.keystore"
+          fileName: "android_keystore.jks"
           encodedString: $KEYSTORE_FILE
 
       - name: Set Keystore Path
         run: echo "KEYSTORE_PATH=${{ steps.android_keystore.outputs.filePath }}" >> $GITHUB_ENV
-
-      - name: Debug Keystore Content
-        run: cat $KEYSTORE_PATH
 
       - name: Build appbundle
         run: flutter build appbundle
