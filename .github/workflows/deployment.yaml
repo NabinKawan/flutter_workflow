@@ -1,0 +1,4 @@
+name: Flutter CI/CD Workflow
+
+on:
+    push
