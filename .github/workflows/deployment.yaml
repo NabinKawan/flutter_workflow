@@ -10,7 +10,7 @@ jobs:
     env:
       KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
       KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEYSTORE_ALIAS }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
     steps:
       - uses: actions/checkout@v2
@@ -31,9 +31,7 @@ jobs:
           encodedString: $KEYSTORE_FILE
 
       - name: Set Keystore Path
-        run: |
-          echo "KEYSTORE_PATH=${{ steps.android_keystore.outputs.filePath }}" >> $GITHUB_ENV
-          echo "Keystore Path: $KEYSTORE_PATH"
+        run: echo "KEYSTORE_PATH=${{ steps.android_keystore.outputs.filePath }}" >> $GITHUB_ENV
 
       - name: Debug Keystore Content
         run: cat $KEYSTORE_PATH
