@@ -31,7 +31,29 @@ jobs:
           encodedString: $KEYSTORE_FILE
 
       - name: Set Keystore Path
-        run: echo "KEYSTORE_PATH=${{ steps.android_keystore.outputs.filePath }}" >> $GITHUB_ENV
+        run: |
+          echo "KEYSTORE_PATH=${{ steps.android_keystore.outputs.filePath }}" >> $GITHUB_ENV
+          echo "Keystore Path: $KEYSTORE_PATH"
+
+      - name: Debug Keystore Content
+        run: cat $KEYSTORE_PATH
 
       - name: Build appbundle
         run: flutter build appbundle
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app-release
+          path: build/app/outputs/bundle/
+
+  deploy-to-staging:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Deploy to Staging
+        run: echo "Deploying to staging environment..."
