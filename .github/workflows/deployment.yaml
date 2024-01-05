@@ -66,4 +66,4 @@ jobs:
           name: app-release
 
       - name: ls bundle
-        run: ls /home/runner/work/flutter_workflow/flutter_workflow/app/build/app/outputs/bundle/release
+        run: ls ./build/app/outputs/bundle/release
