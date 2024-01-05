@@ -64,9 +64,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: app-release
+          path: app/build/app/outputs/bundle/release/
 
       - name: ls bundle
         run: |
           ls
           pwd
-          ls app/build/app/outputs/bundle/release
+          ls build/app/outputs/bundle/release
