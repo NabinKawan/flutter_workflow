@@ -67,5 +67,6 @@ jobs:
 
       - name: ls bundle
         run: |
+          ls
           pwd
           ls app/build/app/outputs/bundle/release
