@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: app-release
-          path: app/build/app/outputs/bundle/
+          path: app/build/app/outputs/bundle/release/*.aab
 
   deploy-to-staging:
     needs: build
@@ -64,7 +64,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: app-release
-          path: build/app/outputs/bundle/
 
       - name: ls bundle
-        run: ls build/app/outputs/bundle/
+        run: ls build/app/outputs/bundle/release
