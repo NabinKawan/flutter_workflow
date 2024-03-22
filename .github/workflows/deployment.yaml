@@ -39,7 +39,7 @@ jobs:
         
           - name: Extract Version from Tag
             id: extract_version
-            run: echo "::set-output name=VERSION::$(echo '${{ github.ref }}' | sed -E 's/^refs\/tags\/v([0-9]+\.[0-9]+\.[0-9]+)-.*/\1/')"
+            run: echo "::set-output name=VERSION::$(echo '${{ github.ref }}' | sed -E 's/^refs\/tags\/v(.+)/\1/')"
             
           - name: Creating Key.properties file
             run: |
@@ -52,7 +52,7 @@ jobs:
     
           - name: Build appbundle
             working-directory: app/android
-            run: flutter build appbundle --release --build-number ${{ steps.extract_version.outputs.VERSION }}
+            run: flutter build appbundle --release --version-name ${{ steps.extract_version.outputs.VERSION }}
     
           - name: Upload Artifact
             uses: actions/upload-artifact@v2
