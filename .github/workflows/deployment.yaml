@@ -52,7 +52,7 @@ jobs:
     
           - name: Build appbundle
             working-directory: app/android
-            run: flutter build appbundle --release --version-name ${{ steps.extract_version.outputs.VERSION }}
+            run: flutter build appbundle --release --build-name ${{ steps.extract_version.outputs.VERSION }}
     
           - name: Upload Artifact
             uses: actions/upload-artifact@v2
