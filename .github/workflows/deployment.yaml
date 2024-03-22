@@ -1,73 +1,101 @@
-name: Flutter CI/CD Workflow
+name: Flutter Deploy
 
 on:
   push:
-    branches: ["main"]
+    tags:
+        - 'v*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app/
-    env:
-      KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      PROPERTIES_PATH: "./android/key.properties"
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+              working-directory: app/
+        env:
+          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          PROPERTIES_PATH: "./android/key.properties"
+    
+        steps:
+          - uses: actions/checkout@v2
+          
+          - name: Set Up Flutter
+            uses: subosito/flutter-action@v2.8.0
+            with:
+              flutter-version: 3.16.0
+              
+          - name: Create .env file
+            run: |
+              if [[ ${{ github.ref }} =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+-internal$ ]]; then
+                echo "API_BASE_URL=" > .env
+              else
+                echo "API_BASE_URL=" > .env
+              fi
+    
+          - name: Install Dependencies
+            run: flutter pub get
+        
+          - name: Extract Version from Tag
+            id: extract_version
+            run: echo ::set-output name=VERSION ::REGEXP_REPLACE(/^v(.+)/, \1, ${{ github.ref }})
+               
+          - name: Creating Key.properties file
+            run: |
+              echo "keyPassword=${KEY_PASSWORD}" > ${{env.PROPERTIES_PATH}}
+              echo "storePassword=${KEYSTORE_PASSWORD}" >> ${{env.PROPERTIES_PATH}}
+              echo "keyAlias=${KEY_ALIAS}" >> ${{env.PROPERTIES_PATH}}
+    
+          - name: Create Keystore file
+            run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
+    
+          - name: Build appbundle
+            working-directory: app/android
+            run: flutter build appbundle --release --build-number ${{ steps.extract_version.outputs.VERSION }}
+    
+          - name: Upload Artifact
+            uses: actions/upload-artifact@v2
+            with:
+              name: app-release
+              path: app/build/app/outputs/bundle/release/*.aab
 
-    steps:
-      - uses: actions/checkout@v2
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+              working-directory: app/
+        steps:
+        - uses: actions/checkout@v2
 
-      - name: Set Up Flutter
-        uses: subosito/flutter-action@v2.8.0
-        with:
-          flutter-version: 3.16.0
+        - name: Set up Ruby
+          uses: ruby/setup-ruby@v1
+          with:
+            ruby-version: 2.7.2
+            bundler-cache: true
+            
+        - name: Install dependencies
+          working-directory: app/android
+          run: bundle install
 
-      - name: Install Dependencies
-        run: flutter pub get
+        - name: Create Google Play Service Account Key file
+          run: echo "${{ secrets.GPLAY_SERVICE_ACCOUNT_KEY }}" | base64 --decode > android/service_account_key.json
 
-      - name: Creating Key.properties file
-        run: |
-          echo "keyPassword=${KEYSTORE_PASSWORD}" > ${{env.PROPERTIES_PATH}}
-          echo "storePassword=${KEYSTORE_PASSWORD}" >> ${{env.PROPERTIES_PATH}}
-          echo "keyAlias=${KEY_ALIAS}" >> ${{env.PROPERTIES_PATH}}
+        - name: Download Artifact
+          uses: actions/download-artifact@v2
+          with:
+            name: app-release
+            path: app/build/app/outputs/bundle/release/
 
-      - name: Create Keystore file
-        run: echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/app/key.jks
-
-      - name: Build appbundle
-        working-directory: app/android
-        run: flutter build appbundle
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: app-release
-          path: app/build/app/outputs/bundle/release/*.aab
-
-  deploy-to-staging:
-    needs: build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app/
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Deploy to Staging
-        run: echo "Deploying to staging environment..."
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: app-release
-          path: app/build/app/outputs/bundle/release/
-
-      - name: ls bundle
-        run: |
-          ls
-          pwd
-          ls build/app/outputs/bundle/release
+        - name: Deploy to Play Store Track
+          working-directory: app/android
+          run: |
+            if [[ ${{ github.ref }} =~ ^v[0-9]+\.[0-9]+\.[0-9]+-internal$ ]]; then
+                echo "Internal release"
+            else
+                echo "Production release"
+            fi
+          env:
+            GPLAY_SERVICE_ACCOUNT_KEY: service_account_key.json
+            AAB_PATH: ../build/app/outputs/bundle/release/app-release.aab
